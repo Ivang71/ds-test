@@ -1,9 +1,6 @@
-import * as dotenv from 'dotenv'
 import express, { Request, Response } from 'express'
 import { chromium } from 'playwright'
 
-
-dotenv.config()
 
 const app = express()
 const port = 19827
