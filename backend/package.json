@@ -1,5 +1,21 @@
 {
-  "dependencies": {
-    "express": "^4.18.2"
-  }
+    "name": "ds-test-backend",
+    "version": "0.0.1",
+    "main": "src/main.ts",
+    "license": "MIT",
+    "type": "module",
+    "scripts": {
+        "dev": "node --watch --no-warnings --loader=ts-node/esm ./src/main.ts",
+        "start-bg": "nohup node --watch --no-warnings --loader=ts-node/esm ./src/main.ts >> ./logs/application.log 2>&1 &",
+        "stop-bg": "pkill -f 'node --watch --no-warnings --loader=ts-node/esm ./src/main.ts'"
+    },
+    "dependencies": {
+        "@types/express": "^4.17.21",
+        "@types/node": "^20.10.4",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "playwright": "^1.40.1",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.3.3"
+    }
 }
