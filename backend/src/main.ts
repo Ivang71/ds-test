@@ -5,7 +5,7 @@ import cors from 'cors'
 
 
 const app = express()
-const port = 80
+const port = 3128
 
 app.use(cors()) // Небезопасно в проде
 
