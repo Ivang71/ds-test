@@ -1,6 +1,6 @@
 <script>
 const dev = false
-const BACKEND_ADDRESS = dev ? 'http://localhost:3128' : 'http://54.89.204.113:3128'
+const BACKEND_ADDRESS = dev ? 'http://localhost:3128' : 'https://tznc2aqlol.execute-api.us-east-1.amazonaws.com/prod'
 
 export default {
     data() {
