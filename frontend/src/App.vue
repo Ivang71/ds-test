@@ -185,6 +185,8 @@ button:disabled {
     border: 1px solid #3498db;
     box-shadow: 0 0 5px #3498db;
     transition: border-color 0.3s, box-shadow 0.3s;
+    background-color: #2c3e50; /* Adjust input background color based on your theme */
+    color: #fff; 
 }
 
 .input:focus {
