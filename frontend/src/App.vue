@@ -9,44 +9,67 @@ export default {
             jsFiles: [],
             isFetching: false,
             serverStatus: '',
-        };
+        }
     },
     methods: {
+        validateAndFormatUrl(url) {
+            if (!url.includes('.')) return null
+            try {
+                const validatedUrl = new URL(url)
+                return url
+            } catch (error) {
+                // If an error occurs, the URL is invalid, try to prepend 'https://' and validate again
+                try {
+                    const withHttps = `https://${url}`
+                    const validatedWithHttps = new URL(withHttps)
+                    return withHttps
+                } catch (secondError) {
+                    // If adding 'https://' doesn't make it valid, return null
+                    return null
+                }
+            }
+        },
         async getData() {
             if (this.isFetching) return
+            const formattedUrl = this.validateAndFormatUrl(this.urlInput)
+            if (!formattedUrl) {
+                alert('Please provide a valid url')
+                return
+            }
+
             try {
                 this.cssFiles = []
                 this.jsFiles = []
-                this.isFetching = true;
-                const response = await fetch(`${BACKEND_ADDRESS}/?url=${this.urlInput}`);
+                this.isFetching = true
+                const response = await fetch(`${BACKEND_ADDRESS}/?url=${formattedUrl}`)
                 const data = await response.json()
 
                 const extractFileName = (url) => {
-                    const parts = url.split('/');
-                    return parts[parts.length - 1];
+                    const parts = url.split('/')
+                    return parts[parts.length - 1]
                 }
 
-                this.cssFiles = (data.cssFiles || []).map(url => ({ name: extractFileName(url), url }));
-                this.jsFiles = (data.jsFiles || []).map(url => ({ name: extractFileName(url), url }));
+                this.cssFiles = (data.cssFiles || []).map(url => ({ name: extractFileName(url), url }))
+                this.jsFiles = (data.jsFiles || []).map(url => ({ name: extractFileName(url), url }))
             } catch (error) {
-                console.error('Error fetching data:', error.message);
+                console.error('Error fetching data:', error.message)
             } finally {
-                this.isFetching = false;
+                this.isFetching = false
             }
         },
         fillInputWithLink(link) {
-            this.urlInput = link;
+            this.urlInput = link
         },
         async checkServerStatus() {
             try {
-                const response = await fetch(`${BACKEND_ADDRESS}/ping`);
+                const response = await fetch(`${BACKEND_ADDRESS}/ping`)
                 if (response.status === 200) {
-                    this.serverStatus = 'reachable';
+                    this.serverStatus = 'reachable'
                 } else {
-                    this.serverStatus = 'unreachable';
+                    this.serverStatus = 'unreachable'
                 }
             } catch (error) {
-                this.serverStatus = 'unreachable';
+                this.serverStatus = 'unreachable'
             }
         },
     },
@@ -58,7 +81,7 @@ export default {
 
 <template>
     <div v-if="serverStatus === 'unreachable'" class="unreacheable-message">
-      Backend is unreachable
+        Backend is unreachable
     </div>
     <div class="url-fetcher-container">
         <h1 class="app-title">Get CSS and JS files from a Website</h1>
@@ -67,7 +90,7 @@ export default {
             <button @click="fillInputWithLink('https://openai.com')" class="suggestion-button">Openai</button>
             <button @click="fillInputWithLink('https://amazon.com')" class="suggestion-button">Amazon</button>
         </div>
-        <input type="text" class="input" placeholder="Enter URL" v-model="urlInput" @keyup.enter="getData"/>
+        <input type="text" class="input" placeholder="Enter URL" v-model="urlInput" @keyup.enter="getData" />
         <button @click="getData" class="button" :disabled="isFetching">Get</button>
 
         <!-- Loader -->
@@ -106,10 +129,10 @@ export default {
 
 <style scoped>
 .unreacheable-message {
-  background-color: #e74c3c;
-  color: #fff;
-  padding: 15px;
-  font-size: 1.4em;
+    background-color: #e74c3c;
+    color: #fff;
+    padding: 15px;
+    font-size: 1.4em;
     position: fixed;
     left: 0;
     right: 0;
@@ -155,19 +178,19 @@ button:disabled {
 }
 
 .input {
-  width: 70%;
-  padding: 8px;
-  margin-right: 10px;
-  border-radius: 5px;
-  border: 1px solid #3498db;
-  box-shadow: 0 0 5px #3498db;
-  transition: border-color 0.3s, box-shadow 0.3s;
+    width: 70%;
+    padding: 8px;
+    margin-right: 10px;
+    border-radius: 5px;
+    border: 1px solid #3498db;
+    box-shadow: 0 0 5px #3498db;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .input:focus {
-  outline: none;
-  border-color: #2980b9;
-  box-shadow: 0 0 20px #2980b9;
+    outline: none;
+    border-color: #2980b9;
+    box-shadow: 0 0 20px #2980b9;
 }
 
 .button {
