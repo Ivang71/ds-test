@@ -1,5 +1,6 @@
 <script>
-const BACKEND_ADDRESS = 'http://localhost:19827'
+const dev = false
+const BACKEND_ADDRESS = dev ? 'http://localhost:3128' : 'http://54.89.204.113:3128'
 
 export default {
     data() {
