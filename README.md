@@ -1,4 +1,4 @@
-View [demo](https://ivang71.github.io/ds-test)
+View [demo](https://ivang71.github.io/ds-test){:target="_blank"}
 
 Setting up the backend:
 
