@@ -1,17 +1,27 @@
 <template>
     <div>
-      <h1>URL Fetcher</h1>
-      <label for="urlInput">Enter URL:</label>
-      <input v-model="urlInput" type="text" id="urlInput">
-      <button @click="fetchUrls">Get</button>
-      
-      <div v-if="interceptedUrls.length > 0">
-        <h2>Intercepted URLs:</h2>
-        <ul>
-          <li v-for="fileInfo in interceptedUrls" :key="fileInfo.url">
-            <a :href="fileInfo.url" target="_blank">{{ fileInfo.name }}</a>
-          </li>
-        </ul>
+      <label for="urlInput">URL:</label>
+      <input v-model="urlInput" id="urlInput" type="text" placeholder="Enter URL" />
+      <button @click="getData">Get</button>
+  
+      <div v-if="cssFiles.length || jsFiles.length">
+        <div v-if="cssFiles.length">
+          <h2>CSS Files:</h2>
+          <ul>
+            <li v-for="(cssFile, index) in cssFiles" :key="index">
+              <a :href="cssFile.url" target="_blank">{{ cssFile.name }}</a>
+            </li>
+          </ul>
+        </div>
+  
+        <div v-if="jsFiles.length">
+          <h2>JS Files:</h2>
+          <ul>
+            <li v-for="(jsFile, index) in jsFiles" :key="index">
+              <a :href="jsFile.url" target="_blank">{{ jsFile.name }}</a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </template>
@@ -21,30 +31,23 @@
     data() {
       return {
         urlInput: '',
-        interceptedUrls: [],
+        cssFiles: [],
+        jsFiles: [],
       };
     },
     methods: {
-      async fetchUrls() {
+      async getData() {
         try {
-          // Make a request to localhost with the URL as a query parameter
-          const response = await fetch(`http://localhost:19827/?url=${encodeURIComponent(this.urlInput)}`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-  
-          // Parse the response JSON
+          const response = await fetch(`http://localhost:19827/?url=${this.urlInput}`);
           const data = await response.json();
   
-          // Process URLs and store in interceptedUrls
-          this.interceptedUrls = data.interceptedUrls.map(url => ({
-            name: this.extractFileName(url),
-            url: url,
-          }));
+          // Extract file names for CSS files
+          this.cssFiles = (data.cssFiles || []).map(url => ({ name: this.extractFileName(url), url }));
+  
+          // Extract file names for JS files
+          this.jsFiles = (data.jsFiles || []).map(url => ({ name: this.extractFileName(url), url }));
         } catch (error) {
-          console.error('Error fetching URLs:', error);
+          console.error('Error fetching data:', error.message);
         }
       },
       extractFileName(url) {

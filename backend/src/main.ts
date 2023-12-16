@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express'
-import { chromium } from 'playwright'
+import axios from 'axios'
+import { parse } from 'node-html-parser'
 import cors from 'cors'
 
 
@@ -8,39 +9,36 @@ const port = 19827
 
 app.use(cors()) // Небезопасно в проде
 
+const addHttpsToUrlArray = (urls: string[]) => urls.map((url) => url.startsWith('//') ? `https:${url}` : url)
+
 /**
- * В реальном приложении вероятно потребовалось бы реализовать сменные прокси и рандомные отпечатки браузера для обхода лимита запросов
- * Альтернативно можно было бы сделать кеширование последних n запросов в памяти
+ * Это решение пропустить некоторые файлы если они загружаются не напрямую из html а из js кода.
+ * Для получения таких файлов можно использовать браузер без интерфейса с перехватом запросов 
  */
 app.get('/', async (req: Request, res: Response) => {
     const url: string | undefined = req.query.url as string
 
-    if (!url) {
-        return res.status(400).send('Please provide a valid URL.')
-    }
-
     try {
-        const browser = await chromium.launch()
-        const context = await browser.newContext()
-        const page = await context.newPage()
+        if (!url) {
+            return res.status(400).json({ error: 'URL is required' })
+        }
 
-        const interceptedUrls: string[] = []
+        // Fetch HTML content from the specified URL
+        const { data: htmlContent } = await axios.get(url)
 
-        // Intercept network requests
-        await page.route('**/*.{css,js}', (route) => {
-            const url = route.request().url()
-            interceptedUrls.push(url)
-            route.continue()
-        })
+        // Parse HTML content to extract CSS and JS files
+        const root = parse(htmlContent)
+        let cssFiles = root.querySelectorAll('link[rel="stylesheet"]').map(link => link.getAttribute('href'))
+        let jsFiles = root.querySelectorAll('script[src]').map(script => script.getAttribute('src'))
 
-        await page.goto(url)
+        cssFiles = addHttpsToUrlArray(cssFiles)
+        jsFiles = addHttpsToUrlArray(jsFiles)
 
-        await browser.close()
-
-        res.json({ interceptedUrls })
+        // Return the extracted files to the requester
+        res.json({ cssFiles, jsFiles })
     } catch (error) {
-        console.error('Error:', error)
-        res.status(500).send('Internal Server Error')
+        console.error('Error:', error.message)
+        res.status(500).json({ error: 'Internal Server Error' })
     }
 })
 
